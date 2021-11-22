@@ -8,8 +8,13 @@ authors = ["tworedz"]
 python = "^3.8"
 fastapi = "^0.68.1"
 deta = "^1.0.0"
+requests = "^2.26.0"
+aiogram = "^2.14.3"
 
 [tool.poetry.dev-dependencies]
+isort = "^5.10.1"
+black = "^21.11b1"
+flake8 = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
