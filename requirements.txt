@@ -2,3 +2,4 @@ fastapi
 deta
 requests
 aiogram
+fastapi_security_telegram_webhook
