@@ -13,6 +13,8 @@ aiogram = "^2.14.3"
 uvicorn = "^0.15.0"
 fastapi-security-telegram-webhook = "^0.2.0"
 pydantic = "^1.8.2"
+fastapi-utils = "^0.2.1"
+httpx = "^0.21.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"

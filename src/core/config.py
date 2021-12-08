@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     HOST_PATH: AnyHttpUrl
     DATABASE_CLASS: str = "db.database.MemoryDatabase"
     WEBHOOK_ENABLED: bool = False
+    REPEAT_EVERY: int = 60 * 10
+    FILM_ID: int = 1307
+    CHANNEL_ID: str = "-1001709625266"
+    TIMEOUT: int = 30
 
     # Telegram
     TELEGRAM_BOT_API_KEY: SecretStr
