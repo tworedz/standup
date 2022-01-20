@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from aiogram import types
 
+import sqlite3
 from core.config import settings
 from core.logging import logger
 
