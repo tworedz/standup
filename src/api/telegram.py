@@ -29,3 +29,8 @@ async def telegram_webhook(
     asyncio.create_task(dp.process_update(telegram_update))
     # await dp.process_update(telegram_update)
     return Response(status_code=status.HTTP_200_OK)
+
+
+@router.get("/sample/")
+async def example():
+    return "example"

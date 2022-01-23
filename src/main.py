@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup():
     if not settings.WEBHOOK_ENABLED:
-        await dp.start_polling()
+        asyncio.create_task(dp.start_polling())
         logger.info("Long polling started".center(79, "-"))
         return
 

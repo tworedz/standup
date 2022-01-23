@@ -8,6 +8,7 @@ from schemas.users import UserSchema
 
 class UserCRUD:
     _table = "users"
+
     @classmethod
     async def create_user(cls, user: UserSchema) -> None:
         await database.insert(cls._table, user)
