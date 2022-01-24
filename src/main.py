@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from api.routers import api_router
 from core.config import settings
+from core.database import database
 from handlers import *  # noqa
 from sdk.exceptions import telegram_exception_handler
 from telegram.bot import bot
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup():
+    await database.connect()
     if not settings.WEBHOOK_ENABLED:
         asyncio.create_task(dp.start_polling())
         logger.info("Long polling started".center(79, "-"))
@@ -41,5 +43,6 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
+    await database.disconnect()
     logger.info("Bye!")
     # await bot.delete_webhook()
