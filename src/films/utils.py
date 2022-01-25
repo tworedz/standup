@@ -26,8 +26,6 @@ def get_movie_page_url(movie_id: int) -> str:
     return f"https://www.cinematica.kg/movies/{movie_id}"
 
 
-@app.on_event("startup")
-@repeat_every(seconds=settings.REPEAT_EVERY)
 async def check_film():
     url = f"https://cinematica.kg/api/v1/repertory/movie/{settings.FILM_ID}/grouped"
     client = httpx.AsyncClient()

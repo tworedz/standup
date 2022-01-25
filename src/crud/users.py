@@ -7,18 +7,14 @@ from pydantic import parse_obj_as
 from core.database import database
 from aiogram import types
 
+from crud.base import BaseCRUD
+from models import Group
 from models import User
 from schemas.users import UserSchema, UserCreateSchema
 
 
-class UserCRUD:
+class UserCRUD(BaseCRUD):
     _model = User
-
-    @classmethod
-    def generate_id(cls) -> dict:
-        return {
-            cls._model.id.key: uuid.uuid4(),
-        }
 
     @classmethod
     async def get_or_create_user(cls, user_data: UserCreateSchema) -> UserSchema:
@@ -40,3 +36,11 @@ class UserCRUD:
         query = sa.select([cls._model])
         result = await database.fetch_all(query)
         return parse_obj_as(List[UserSchema], result)
+
+
+class GroupCRUD(BaseCRUD):
+    _model = Group
+
+    @classmethod
+    async def get_or_create_group(cls, group_data: ...) -> ...:
+        pass
