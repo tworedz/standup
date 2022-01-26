@@ -7,8 +7,8 @@ from pydantic import BaseModel
 class UserSchema(BaseModel):
     """Схема пользователя"""
 
-    id: Optional[UUID]
-    telegram_id: Optional[int]
+    id: UUID
+    telegram_id: int
     username: Optional[str]
     name: Optional[str]
     surname: Optional[str]
@@ -17,18 +17,29 @@ class UserSchema(BaseModel):
 class UserCreateSchema(BaseModel):
     """Схема создания пользователя"""
 
-    telegram_id: Optional[int]
+    telegram_id: int
     username: Optional[str]
     name: Optional[str]
     surname: Optional[str]
 
 
-class Group(BaseModel):
+class GroupSchema(BaseModel):
     """Схема группы"""
 
-    id: int
-    name: str
+    id: UUID
+    telegram_id: int
+    name: Optional[str]
 
 
-class UserGroup(BaseModel):
+class GroupCreateSchema(BaseModel):
+    """Схема создания группы"""
+
+    telegram_id: int
+    title: str
+
+
+class UserGroupSchema(BaseModel):
     """схема пользователя в группе"""
+
+    user_id: UUID
+    group_id: UUID

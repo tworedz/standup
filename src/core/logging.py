@@ -1,3 +1,3 @@
-import logging
+import structlog
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger()
