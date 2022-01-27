@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.getLevelName(settings.DEBUG_LEVEl))
 logger = logging.getLogger(__name__)
 
 
-@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16,23", minute="18-35")
+@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16")
 async def warmup():
     groups = await GroupCRUD.get_groups()
     summoner = await WarmUpSummonCRUD.get_random_summoner()
