@@ -60,6 +60,15 @@ class UserCRUD(BaseCRUD):
         return parse_obj_as(List[UserSchema], result)
 
     @classmethod
+    async def get_group_users(cls, chat_id: int) -> list[UserSchema]:
+        query = (
+            sa.select([cls._model])
+            .select_from(sa.join(User, UserGroup).join(UserGroup, Group))
+            .where(Group.telegram_id == chat_id)
+        )
+        return await cls.get_results(query)
+
+    @classmethod
     async def get_random_user(cls) -> Optional[UserSchema]:
         query = cls.get_base_query().order_by(sa.func.random()).limit(1)
         result = await database.fetch_one(query)

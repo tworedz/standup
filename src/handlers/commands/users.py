@@ -9,6 +9,7 @@ from crud.users import UserCRUD
 from schemas.users import GroupCreateSchema
 from schemas.users import UserCreateSchema
 from schemas.users import UserSchema
+from sdk.utils import wait_for
 from telegram.bot import bot
 from telegram.dispatcher import dp
 
@@ -59,10 +60,14 @@ async def register_user(message: types.Message) -> None:
 
 @dp.message_handler(commands=["users"])
 async def get_users(message: types.Message) -> None:
+    chat = message.chat
+    if chat.type == types.ChatType.PRIVATE:
+        return
+
     users = await UserCRUD.get_users()
-    users = [f"{user.username} ({user.telegram_id})" for user in users]
-    response = await message.reply("\n".join(map(str, users)))
-    await asyncio.sleep(5)
+    users = [f"{user.mention}" for user in users]
+    response = await message.reply("\n".join(map(str, users)), parse_mode=types.ParseMode.MARKDOWN_V2)
+    await wait_for()
     await message.delete()
     await response.delete()
 

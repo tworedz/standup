@@ -1,6 +1,8 @@
 from uuid import uuid4
 
 import sqlalchemy as sa
+from sqlalchemy.orm import relationship
+
 from core.database import Base
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
