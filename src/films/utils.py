@@ -2,10 +2,12 @@ from typing import Dict
 
 import httpx
 from aiogram import types
-
 from core.config import settings
-from main import logger, app
-from schemas.films import FilmSchema, BookResponse, Cinema
+from main import app
+from main import logger
+from schemas.films import BookResponse
+from schemas.films import Cinema
+from schemas.films import FilmSchema
 from telegram.bot import bot
 
 

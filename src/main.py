@@ -1,18 +1,21 @@
 import logging
+import uuid
 
+import sqlalchemy as sa
 from aiogram.utils.exceptions import TelegramAPIError
-from fastapi import FastAPI
-
 from api.routers import api_router
 from core.config import settings
 from core.database import database
+from core.scheduler import scheduler
+from fastapi import FastAPI
 from handlers import *  # noqa
+from models import WarmUpSummon
 from sdk.exceptions import telegram_exception_handler
+from sqlalchemy import create_engine
+from sqlalchemy.dialects.postgresql import insert
 from telegram.bot import bot
 
-app = FastAPI(exception_handlers={
-    TelegramAPIError: telegram_exception_handler
-})
+app = FastAPI(exception_handlers={TelegramAPIError: telegram_exception_handler})
 
 app.include_router(api_router)
 
@@ -20,9 +23,52 @@ logging.basicConfig(level=logging.getLevelName(settings.DEBUG_LEVEl))
 logger = logging.getLogger(__name__)
 
 
+@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16,23", minute="18-35")
+async def warmup():
+    groups = await GroupCRUD.get_groups()
+    summoner = await WarmUpSummonCRUD.get_random_summoner()
+    user = await UserCRUD.get_random_user()
+    if not summoner:
+        logger.warning("There is no summoners")
+        return
+    if not user:
+        logger.warning("There is not users")
+        return
+
+    for group in groups:
+        await bot.send_message(
+            chat_id=group.telegram_id,
+            text=summoner.text.format(user.mention),
+            parse_mode=aiogram.types.ParseMode.MARKDOWN_V2,
+        )
+
+
+BASE_SUMMONERS = [
+    WarmUpSummonCreateSchema(text="Just do it, {} 💪"),
+    WarmUpSummonCreateSchema(text="Свистать всех на вверх\! {}, веди нас 🧭"),
+    WarmUpSummonCreateSchema(text="Покажи класс, {} 😎"),
+    WarmUpSummonCreateSchema(text="3, 4, закончили\! {}, у тебя счастливый билет 🤞"),
+]
+
+
+def insert_base_summoners() -> None:
+    engine = create_engine(url=settings.DB_URI, echo=True)
+    conn = engine.connect()
+    for summoner in BASE_SUMMONERS:
+        q = (
+            insert(WarmUpSummon)
+            .values(id=str(uuid.uuid4()), text=summoner.text)
+            .on_conflict_do_nothing()
+        )
+        conn.execute(q)
+
+
 @app.on_event("startup")
 async def startup():
+    scheduler.start()
     await database.connect()
+    insert_base_summoners()
+
     if not settings.WEBHOOK_ENABLED:
         asyncio.create_task(dp.start_polling())
         logger.info("Long polling started".center(79, "-"))
@@ -44,5 +90,6 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
+    scheduler.shutdown()
     logger.info("Bye!")
     # await bot.delete_webhook()

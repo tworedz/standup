@@ -1,8 +1,8 @@
-from sqlalchemy.dialects.postgresql import UUID
-
-from core.database import Base
-import sqlalchemy as sa
 from uuid import uuid4
+
+import sqlalchemy as sa
+from core.database import Base
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class WarmUpSchedule(Base):
@@ -21,4 +21,4 @@ class WarmUpSummon(Base):
     __tablename__ = "warmup_summons"
 
     id = sa.Column(UUID, primary_key=True, index=True, default=uuid4, unique=True)
-    summoner = sa.Column(sa.String)
+    text = sa.Column(sa.String, unique=True)

@@ -12,6 +12,7 @@ class UserSchema(BaseModel):
     username: Optional[str]
     name: Optional[str]
     surname: Optional[str]
+    mention: Optional[str]
 
 
 class UserCreateSchema(BaseModel):
@@ -21,6 +22,7 @@ class UserCreateSchema(BaseModel):
     username: Optional[str]
     name: Optional[str]
     surname: Optional[str]
+    mention: Optional[str]
 
 
 class GroupSchema(BaseModel):

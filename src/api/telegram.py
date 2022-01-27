@@ -4,13 +4,12 @@ from typing import Dict
 
 from aiogram import Dispatcher
 from aiogram.types import Update
+from core.config import settings
 from fastapi import APIRouter
 from fastapi.params import Depends
+from sdk.dependencies import bot_dispatcher
 from starlette import status
 from starlette.responses import Response
-
-from core.config import settings
-from sdk.dependencies import bot_dispatcher
 
 router = APIRouter()
 
@@ -27,10 +26,4 @@ async def telegram_webhook(
     """
     telegram_update = Update(**update_raw)
     asyncio.create_task(dp.process_update(telegram_update))
-    # await dp.process_update(telegram_update)
     return Response(status_code=status.HTTP_200_OK)
-
-
-@router.get("/sample/")
-async def example():
-    return "example"

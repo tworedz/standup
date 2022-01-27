@@ -1,0 +1,5 @@
+SUMMONER_REMOVED = "Summoner removed!"
+SUMMONER_ADDED = "Summoner added!"
+NO_SUMMONERS = "There is no drama"
+SUMMONERS = "Summoners:"
+WRONG_SUMMONER = "Wrong summoner\!\nUsage: `/s Go, $me, Go\!`"

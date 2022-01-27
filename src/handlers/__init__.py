@@ -1,4 +1,3 @@
 # flake8: noqa
-from .message import *
-from .users import *
+from .callbacks import *
 from .commands import *

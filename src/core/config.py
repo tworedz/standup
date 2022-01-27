@@ -1,8 +1,9 @@
 import logging
 from typing import Optional
 
-from pydantic import AnyHttpUrl, PostgresDsn
+from pydantic import AnyHttpUrl
 from pydantic import BaseSettings
+from pydantic import PostgresDsn
 from pydantic import SecretStr
 from pydantic import validator
 

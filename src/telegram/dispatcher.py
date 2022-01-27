@@ -1,6 +1,6 @@
-from aiogram import Dispatcher, Bot
+from aiogram import Bot
+from aiogram import Dispatcher
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-
 from telegram.bot import bot
 
 dp = Dispatcher(bot)

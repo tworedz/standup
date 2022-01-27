@@ -1,9 +1,9 @@
-import sqlalchemy as sa
-from sqlalchemy import UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
 from uuid import uuid4
 
+import sqlalchemy as sa
 from core.database import Base
+from sqlalchemy import UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class User(Base):
@@ -16,6 +16,7 @@ class User(Base):
     username = sa.Column(sa.String)
     name = sa.Column(sa.String)
     surname = sa.Column(sa.String)
+    mention = sa.Column(sa.String)
 
 
 class Group(Base):
@@ -31,9 +32,7 @@ class UserGroup(Base):
     """Пользователь в группе"""
 
     __tablename__ = "user_groups"
-    __table_args__ = (
-        UniqueConstraint("user_id", "group_id"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "group_id"),)
 
     id = sa.Column(UUID, primary_key=True, index=True, default=uuid4, unique=True)
     user_id = sa.Column(UUID)

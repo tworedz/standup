@@ -7,10 +7,10 @@ class WarmUpSummonSchema(BaseModel):
     """Схема призывалки"""
 
     id: UUID
-    summoner: str
+    text: str
 
 
 class WarmUpSummonCreateSchema(BaseModel):
     """Схема создания призывалки"""
 
-    summoner: str
+    text: str

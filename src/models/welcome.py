@@ -1,8 +1,8 @@
-import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
 from uuid import uuid4
 
+import sqlalchemy as sa
 from core.database import Base
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class WelcomeFile(Base):
