@@ -55,6 +55,8 @@ BASE_SUMMONERS = [
     WarmUpSummonCreateSchema(text="Свистать всех наверх\! {}, веди нас 🧭"),
     WarmUpSummonCreateSchema(text="Покажи класс, {} 😎"),
     WarmUpSummonCreateSchema(text="3, 4, закончили\! {}, у тебя счастливый билет 🤞"),
+    WarmUpSummonCreateSchema(text="🧛 Кошелёк или разминка, {}"),
+    WarmUpSummonCreateSchema(text="Roses are red, Violets are blue, Coach is {}"),
 ]
 
 
