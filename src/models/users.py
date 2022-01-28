@@ -37,5 +37,5 @@ class UserGroup(Base):
     __table_args__ = (UniqueConstraint("user_id", "group_id"),)
 
     id = sa.Column(UUID, primary_key=True, index=True, default=uuid4, unique=True)
-    user_id = sa.Column(UUID)
-    group_id = sa.Column(UUID)
+    user_id = sa.Column(UUID, sa.ForeignKey("users.id", ondelete="CASCADE"))
+    group_id = sa.Column(UUID, sa.ForeignKey("groups.id", ondelete="CASCADE"))
