@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.getLevelName(settings.DEBUG_LEVEl))
 logger = logging.getLogger(__name__)
 
 
-@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16")
+@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16", minute="10")
 async def warmup():
     groups = await GroupCRUD.get_groups()
     summoner = await WarmUpSummonCRUD.get_random_summoner()
@@ -36,11 +36,18 @@ async def warmup():
         return
 
     for group in groups:
-        await bot.send_message(
-            chat_id=group.telegram_id,
-            text=summoner.text.format(user.mention),
-            parse_mode=aiogram.types.ParseMode.MARKDOWN_V2,
-        )
+        try:
+            await bot.send_message(
+                chat_id=group.telegram_id,
+                text=summoner.text.format(user.mention),
+                parse_mode=aiogram.types.ParseMode.MARKDOWN_V2,
+            )
+        except aiogram.exceptions.MigrateToChat as e:
+            await bot.send_message(
+                chat_id=e.migrate_to_chat_id,
+                text=summoner.text.format(user.mention),
+                parse_mode=aiogram.types.ParseMode.MARKDOWN_V2,
+            )
 
 
 BASE_SUMMONERS = [
