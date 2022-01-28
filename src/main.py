@@ -45,7 +45,7 @@ async def warmup():
 
 BASE_SUMMONERS = [
     WarmUpSummonCreateSchema(text="Just do it, {} 💪"),
-    WarmUpSummonCreateSchema(text="Свистать всех на вверх\! {}, веди нас 🧭"),
+    WarmUpSummonCreateSchema(text="Свистать всех наверх\! {}, веди нас 🧭"),
     WarmUpSummonCreateSchema(text="Покажи класс, {} 😎"),
     WarmUpSummonCreateSchema(text="3, 4, закончили\! {}, у тебя счастливый билет 🤞"),
 ]
