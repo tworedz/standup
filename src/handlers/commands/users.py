@@ -41,7 +41,7 @@ async def register_user(message: types.Message) -> None:
             )
         )
 
-    if chat.type == types.ChatType.GROUP:
+    if chat.type in [types.ChatType.GROUP, types.ChatType.SUPERGROUP]:
         group = await GroupCRUD.get_or_create_group(
             group_data=GroupCreateSchema(telegram_id=chat.id, title=chat.title)
         )
@@ -52,8 +52,8 @@ async def register_user(message: types.Message) -> None:
         animation="CgACAgQAAxkBAAIE7GHvi8d_Y_sUOv4EuezxkMV1iRmBAAKuoAACrhtkB-N_sxcPEI_5IwQ",
         parse_mode=types.ParseMode.MARKDOWN_V2,
     )
-    await asyncio.sleep(5)
-    if chat.type == types.chat.ChatType.GROUP:
+    await wait_for()
+    if chat.type in [types.ChatType.GROUP, types.ChatType.SUPERGROUP]:
         await message.delete()
         await reply.delete()
 
