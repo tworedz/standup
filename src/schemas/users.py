@@ -25,6 +25,15 @@ class UserCreateSchema(BaseModel):
     mention: Optional[str]
 
 
+class UserUpdateSchema(BaseModel):
+    """Схема обновления пользователя"""
+
+    username: Optional[str]
+    name: Optional[str]
+    surname: Optional[str]
+    mention: Optional[str]
+
+
 class GroupSchema(BaseModel):
     """Схема группы"""
 

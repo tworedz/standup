@@ -1,19 +1,18 @@
-from uuid import uuid4
-
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
-
-from core.database import Base
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
+from core.database import Base
+from models.base import PrimaryKeyMixin
+from models.base import TimeStampedMixin
+from models.base import UserChangesMixin
 
-class User(Base):
+
+class User(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
     """Пользователь"""
 
     __tablename__ = "users"
 
-    id = sa.Column(UUID, primary_key=True, index=True, default=uuid4, unique=True)
     telegram_id = sa.Column(sa.BigInteger, unique=True)
     username = sa.Column(sa.String)
     name = sa.Column(sa.String)
@@ -21,21 +20,19 @@ class User(Base):
     mention = sa.Column(sa.String)
 
 
-class Group(Base):
+class Group(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
     """Группа"""
 
     __tablename__ = "groups"
-    id = sa.Column(UUID, primary_key=True, index=True, default=uuid4, unique=True)
     telegram_id = sa.Column(sa.BigInteger, unique=True)
     title = sa.Column(sa.String)
 
 
-class UserGroup(Base):
+class UserGroup(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
     """Пользователь в группе"""
 
     __tablename__ = "user_groups"
     __table_args__ = (UniqueConstraint("user_id", "group_id"),)
 
-    id = sa.Column(UUID, primary_key=True, index=True, default=uuid4, unique=True)
     user_id = sa.Column(UUID, sa.ForeignKey("users.id", ondelete="CASCADE"))
     group_id = sa.Column(UUID, sa.ForeignKey("groups.id", ondelete="CASCADE"))

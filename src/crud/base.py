@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Any
 from typing import List
 from typing import Optional
@@ -29,7 +30,18 @@ class BaseCRUD:
         }
 
     @classmethod
-    def _get_parsed_object(cls, obj: Optional[Any]) -> Optional[BaseModelType]:
+    def time_stamp(cls, is_updated: bool = False) -> dict:
+        data = {
+            cls._model.created_at.key: datetime.now(),
+        }
+        if is_updated:
+            data.update({
+                cls._model.updated_at.key: datetime.now(),
+            })
+        return data
+
+    @classmethod
+    def get_parsed_object(cls, obj: Optional[Any]) -> Optional[BaseModelType]:
         if obj is None:
             return None
         return cls._model_schema.parse_obj(obj)

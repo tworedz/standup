@@ -1,24 +1,22 @@
-import uuid
 from typing import List
 from typing import Optional
 from uuid import UUID
 
 import sqlalchemy as sa
-from aiogram import types
-from asyncpg import UniqueViolationError
+from pydantic import parse_obj_as
+from sqlalchemy.dialects.postgresql import insert
+
 from core.database import database
-from core.logging import logger
 from crud.base import BaseCRUD
 from models import Group
 from models import User
 from models import UserGroup
-from pydantic import parse_obj_as
-
-from schemas.users import GroupCreateSchema, GroupMigrateSchema
+from schemas.users import GroupCreateSchema
+from schemas.users import GroupMigrateSchema
 from schemas.users import GroupSchema
 from schemas.users import UserCreateSchema
-from schemas.users import UserGroupSchema
 from schemas.users import UserSchema
+from schemas.users import UserUpdateSchema
 
 
 class UserCRUD(BaseCRUD):
@@ -26,10 +24,16 @@ class UserCRUD(BaseCRUD):
     _model_schema = UserSchema
 
     @classmethod
-    async def get_user(cls, user_telegram_id: str) -> Optional[UserSchema]:
-        query = sa.select([cls._model]).where(cls._model.telegram_id == user_telegram_id)
-        maybe = await database.fetch_one(query)
-        return cls._get_parsed_object(maybe)
+    async def get_user_by_id(cls, user_id: UUID) -> Optional[UserSchema]:
+        query = cls.get_base_query().where(cls._model.id == user_id)
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
+
+    @classmethod
+    async def get_user_by_telegram_id(cls, telegram_id: str) -> Optional[UserSchema]:
+        query = cls.get_base_query().where(cls._model.telegram_id == telegram_id)
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
 
     @classmethod
     async def create_user(cls, user_data: UserCreateSchema) -> UserSchema:
@@ -39,20 +43,20 @@ class UserCRUD(BaseCRUD):
         }
         query = sa.insert(cls._model, values=values).returning(*cls._model.__table__.columns)
         result = await database.fetch_one(query)
-        return cls._get_parsed_object(result)
+        return cls.get_parsed_object(result)
 
     @classmethod
-    async def update_user(cls, user_data: UserCreateSchema) -> UserSchema:
+    async def update_user(cls, telegram_id: int, user_data: UserUpdateSchema) -> UserSchema:
         values = {
             **user_data.dict(),
         }
         query = (
             sa.update(cls._model, values=values)
-            .where(cls._model.telegram_id == user_data.telegram_id)
+            .where(cls._model.telegram_id == telegram_id)
             .returning(*cls._model.__table__.columns)
         )
         result = await database.fetch_one(query)
-        return cls._get_parsed_object(result)
+        return cls.get_parsed_object(result)
 
     @classmethod
     async def get_users(cls) -> List[UserSchema]:
@@ -61,11 +65,11 @@ class UserCRUD(BaseCRUD):
         return parse_obj_as(List[UserSchema], result)
 
     @classmethod
-    async def get_group_users(cls, chat_id: int) -> list[UserSchema]:
+    async def get_group_users(cls, telegram_id: int) -> list[UserSchema]:
         query = (
             sa.select([cls._model])
-            .select_from(sa.join(User, UserGroup).join(UserGroup, Group))
-            .where(Group.telegram_id == chat_id)
+            .select_from(sa.join(User, UserGroup).join(Group))
+            .where(Group.telegram_id == telegram_id)
         )
         return await cls.get_results(query)
 
@@ -86,20 +90,28 @@ class GroupCRUD(BaseCRUD):
         return await cls.get_results(query)
 
     @classmethod
-    async def get_or_create_group(cls, group_data: GroupCreateSchema) -> GroupSchema:
-        query = sa.select([cls._model]).where(cls._model.telegram_id == group_data.telegram_id)
-        maybe = await database.fetch_one(query)
-        if maybe:
-            return cls._get_parsed_object(maybe)
+    async def get_group_by_telegram_id(cls, telegram_id: int) -> Optional[GroupSchema]:
+        query = sa.select([cls._model]).where(cls._model.telegram_id == telegram_id)
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
 
+    @classmethod
+    async def create_group(cls, group_data: GroupCreateSchema) -> GroupSchema:
         values = {
             **cls.generate_id(),
+            **cls.time_stamp(),
             **group_data.dict(),
         }
 
-        query = sa.insert(cls._model, values=values).returning(*cls._model.__table__.columns)
+        query = (
+            insert(cls._model, values=values)
+            .returning(*cls._model.__table__.columns)
+            .on_conflict_do_update(
+                index_elements=["telegram_id"], set_={cls._model.title.key: group_data.title}
+            )
+        )
         result = await database.fetch_one(query)
-        return cls._get_parsed_object(result)
+        return cls.get_parsed_object(result)
 
     @classmethod
     async def add_user_to_group(cls, user_id: UUID, group_id: UUID) -> None:
@@ -109,17 +121,16 @@ class GroupCRUD(BaseCRUD):
             UserGroup.group_id.key: group_id,
         }
 
-        query = sa.insert(UserGroup, values=values)
-        try:
-            await database.fetch_one(query)
-        except UniqueViolationError as e:
-            logger.info("This user already in this group", error=e)
+        query = insert(UserGroup, values=values).on_conflict_do_nothing()
+        await database.fetch_one(query)
 
     @classmethod
-    async def update_group(cls, telegram_id: str, data: GroupMigrateSchema) -> Optional[GroupSchema]:
+    async def migrate_to_super_group(
+        cls, telegram_id: str, data: GroupMigrateSchema
+    ) -> Optional[GroupSchema]:
         values = {
             cls._model.telegram_id.key: data.super_group_id,
         }
         query = sa.update(cls._model, values=values).where(cls._model.telegram_id == telegram_id)
         result = await database.fetch_one(query)
-        return cls._get_parsed_object(result)
+        return cls.get_parsed_object(result)
