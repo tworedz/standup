@@ -13,7 +13,8 @@ from models import Group
 from models import User
 from models import UserGroup
 from pydantic import parse_obj_as
-from schemas.users import GroupCreateSchema
+
+from schemas.users import GroupCreateSchema, GroupMigrateSchema
 from schemas.users import GroupSchema
 from schemas.users import UserCreateSchema
 from schemas.users import UserGroupSchema
@@ -113,3 +114,12 @@ class GroupCRUD(BaseCRUD):
             await database.fetch_one(query)
         except UniqueViolationError as e:
             logger.info("This user already in this group", error=e)
+
+    @classmethod
+    async def update_group(cls, telegram_id: str, data: GroupMigrateSchema) -> Optional[GroupSchema]:
+        values = {
+            cls._model.telegram_id.key: data.super_group_id,
+        }
+        query = sa.update(cls._model, values=values).where(cls._model.telegram_id == telegram_id)
+        result = await database.fetch_one(query)
+        return cls._get_parsed_object(result)

@@ -10,6 +10,7 @@ from schemas.users import GroupCreateSchema
 from schemas.users import UserCreateSchema
 from schemas.users import UserSchema
 from sdk.utils import wait_for
+from services.chats import ChatService
 from telegram.bot import bot
 from telegram.dispatcher import dp
 
@@ -47,13 +48,12 @@ async def register_user(message: types.Message) -> None:
         )
         await GroupCRUD.add_user_to_group(user_id=user.id, group_id=group.id)
 
-    reply = await message.answer_animation(
-        caption=f"Welcome to the club, {telegram_user.get_mention()}",
-        animation="CgACAgQAAxkBAAIE7GHvi8d_Y_sUOv4EuezxkMV1iRmBAAKuoAACrhtkB-N_sxcPEI_5IwQ",
+    reply = await message.reply(
+        text=f"Welcome to the club, {telegram_user.get_mention()}",
         parse_mode=types.ParseMode.MARKDOWN_V2,
     )
     await wait_for()
-    if chat.type in [types.ChatType.GROUP, types.ChatType.SUPERGROUP]:
+    if ChatService.is_group(chat):
         await message.delete()
         await reply.delete()
 

@@ -45,3 +45,9 @@ class UserGroupSchema(BaseModel):
 
     user_id: UUID
     group_id: UUID
+
+
+class GroupMigrateSchema(BaseModel):
+    """Схема миграции группы в супергруппу"""
+
+    super_group_id: int
