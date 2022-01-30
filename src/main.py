@@ -23,40 +23,30 @@ logging.basicConfig(level=logging.getLevelName(settings.DEBUG_LEVEl))
 logger = logging.getLogger(__name__)
 
 
-@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16", minute="10")
+@scheduler.scheduled_job("cron", day_of_week="mon-fri", hour="12,16")
 async def warmup():
     groups = await GroupCRUD.get_groups()
-    summoner = await WarmUpSummonCRUD.get_random_summoner()
-    user = await UserCRUD.get_random_user()
-    if not summoner:
-        logger.warning("There is no summoners")
-        return
-    if not user:
-        logger.warning("There is not users")
-        return
 
     for group in groups:
-        try:
-            await bot.send_message(
-                chat_id=group.telegram_id,
-                text=summoner.text.format(user.mention),
-                parse_mode=aiogram.types.ParseMode.MARKDOWN_V2,
-            )
-        except aiogram.exceptions.MigrateToChat as e:
-            await bot.send_message(
-                chat_id=e.migrate_to_chat_id,
-                text=summoner.text.format(user.mention),
-                parse_mode=aiogram.types.ParseMode.MARKDOWN_V2,
-            )
+        user = await WarmUpSummonService.get_warmup_user(group_telegram_id=group.telegram_id)
+        summoner = await WarmUpSummonCRUD.get_random_summoner()
+        keyboard = build_warmup_keyboard(user)
+
+        await bot.send_message(
+            chat_id=group.telegram_id,
+            text=summoner.text.format(user.mention),
+            parse_mode=types.ParseMode.MARKDOWN_V2,
+            reply_markup=keyboard,
+        )
 
 
 BASE_SUMMONERS = [
-    WarmUpSummonCreateSchema(text="Just do it, {} 💪"),
+    WarmUpSummonCreateSchema(text="{}, сегодня ты наш тренер 💪"),
     WarmUpSummonCreateSchema(text="Свистать всех наверх\! {}, веди нас 🧭"),
     WarmUpSummonCreateSchema(text="Покажи класс, {} 😎"),
-    WarmUpSummonCreateSchema(text="3, 4, закончили\! {}, у тебя счастливый билет 🤞"),
     WarmUpSummonCreateSchema(text="🧛 Кошелёк или разминка, {}"),
     WarmUpSummonCreateSchema(text="Roses are red, Violets are blue, Coach is {}"),
+    WarmUpSummonCreateSchema(text="Звёзды решили, что {} сегодня наш тренер"),
 ]
 
 
