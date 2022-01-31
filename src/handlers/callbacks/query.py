@@ -94,7 +94,7 @@ async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
 async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
     admins = await callback_query.message.chat.get_administrators()
     admin_ids = [admin.user.id for admin in admins]
-    if callback_query.message.from_user.id not in admin_ids:
+    if callback_query.from_user.id not in admin_ids:
         return await callback_query.answer("Hey, you are not admin", show_alert=True)
 
     await callback_query.message.edit_text(
