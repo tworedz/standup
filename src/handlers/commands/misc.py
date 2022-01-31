@@ -52,6 +52,7 @@ async def feedback_handler(message: types.Message) -> None:
         await wait_for()
         await message.delete()
         await response.delete()
+        return
 
     await FeedbackCRUD.create_feedback(
         data=FeedbackCreateSchema(from_user_telegram_id=message.from_user.id, message=args)
