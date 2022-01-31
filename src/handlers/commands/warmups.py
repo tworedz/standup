@@ -45,8 +45,11 @@ async def warmup(message: types.Message) -> None:
     summoner = await WarmUpSummonCRUD.get_random_summoner()
     keyboard = build_warmup_keyboard(user)
 
-    await message.reply(
+    response = await message.reply(
         summoner.text.format(user.mention),
         parse_mode=types.ParseMode.MARKDOWN_V2,
         reply_markup=keyboard,
     )
+    await wait_for()
+    await message.delete()
+    await response.delete()
