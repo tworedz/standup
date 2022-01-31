@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_API_KEY: SecretStr = ""
     TELEGRAM_BOT_WEBHOOK_ENDPOINT: str = ""
     TELEGRAM_DROP_PENDING_UPDATES: bool = True
+    TELEGRAM_ALLOWED_COMMANDS: list[str] = [
+        "start",
+        "help",
+    ]
 
     @validator("TELEGRAM_BOT_WEBHOOK_ENDPOINT")
     def construct_webhook(cls, v, values: dict) -> str:
