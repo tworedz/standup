@@ -1,3 +1,3 @@
 import structlog
 
-logger = structlog.getLogger()
+logger: structlog.stdlib.BoundLogger = structlog.getLogger()

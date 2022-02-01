@@ -26,6 +26,7 @@ class Group(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
     __tablename__ = "groups"
     telegram_id = sa.Column(sa.BigInteger, unique=True)
     title = sa.Column(sa.String)
+    language = sa.Column(sa.String)
 
 
 class UserGroup(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):

@@ -14,6 +14,7 @@ from models import UserGroup
 from schemas.users import GroupCreateSchema
 from schemas.users import GroupMigrateSchema
 from schemas.users import GroupSchema
+from schemas.users import GroupUpdateSchema
 from schemas.users import UserCreateSchema
 from schemas.users import UserSchema
 from schemas.users import UserUpdateSchema
@@ -109,6 +110,20 @@ class GroupCRUD(BaseCRUD):
             .on_conflict_do_update(
                 index_elements=["telegram_id"], set_={cls._model.title.key: group_data.title}
             )
+        )
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
+
+    @classmethod
+    async def update_group(cls, telegram_id: int, data: GroupUpdateSchema) -> Optional[GroupSchema]:
+        values = {
+            **cls.time_stamp(is_updated=True),
+            **data.dict(),
+        }
+        query = (
+            sa.update(cls._model, values=values)
+            .where(cls._model.telegram_id == telegram_id)
+            .returning(*cls._model.__table__.columns)
         )
         result = await database.fetch_one(query)
         return cls.get_parsed_object(result)

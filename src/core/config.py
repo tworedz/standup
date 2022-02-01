@@ -7,6 +7,8 @@ from pydantic import PostgresDsn
 from pydantic import SecretStr
 from pydantic import validator
 
+from enums.languages import LanguageEnum
+
 
 class Settings(BaseSettings):
     """Project settings from env variables"""
@@ -27,6 +29,8 @@ class Settings(BaseSettings):
     TELEGRAM_ALLOWED_COMMANDS: list[str] = [
         "start",
         "help",
+        "ping",
+        "feedback",
     ]
 
     @validator("TELEGRAM_BOT_WEBHOOK_ENDPOINT")
@@ -37,6 +41,8 @@ class Settings(BaseSettings):
             + values.get("TELEGRAM_BOT_API_KEY").get_secret_value()
             + "/"
         )
+
+    DEFAULT_LANGUAGE: LanguageEnum = LanguageEnum.EN
 
     # Database settings
     DB_USER: str = "postgres"

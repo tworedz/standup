@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from enums.languages import LanguageEnum
+
 
 class UserSchema(BaseModel):
     """Схема пользователя"""
@@ -39,7 +41,8 @@ class GroupSchema(BaseModel):
 
     id: UUID
     telegram_id: int
-    name: Optional[str]
+    title: Optional[str]
+    language: Optional[LanguageEnum]
 
 
 class GroupCreateSchema(BaseModel):
@@ -47,6 +50,17 @@ class GroupCreateSchema(BaseModel):
 
     telegram_id: int
     title: str
+    language: Optional[LanguageEnum]
+
+
+class GroupUpdateSchema(BaseModel):
+    """Схема изменения группы"""
+
+    title: Optional[str]
+    language: Optional[LanguageEnum]
+
+    class Config:
+        use_enum_values = True
 
 
 class UserGroupSchema(BaseModel):

@@ -5,6 +5,8 @@ from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram import types
 
+from services.chats import ChatService
+
 
 class AuthenticationMiddleware(BaseMiddleware):
     """Проверка прав пользователя"""
@@ -22,11 +24,5 @@ class AuthenticationMiddleware(BaseMiddleware):
         administrators = await message.chat.get_administrators()
         admin_ids = [admin.user.id for admin in administrators]
         if current_user.id not in admin_ids and command not in self.allowed_commands:
-            response = await message.reply("This command only allowed to administrators")
-            await asyncio.sleep(5)
-            try:
-                await message.delete()
-                await response.delete()
-            except (aiogram.exceptions.MessageCantBeDeleted, aiogram.exceptions.MessageToDeleteNotFound):
-                pass
+            await ChatService.reply(message, "This command only allowed to administrators")
             raise CancelHandler()
