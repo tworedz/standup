@@ -24,7 +24,7 @@ class ChatService:
             types.ForceReply,
             None,
         ] = None,
-        /,
+        *,
         delete: bool = True,
         is_markdown: bool = False,
     ) -> None:

@@ -25,7 +25,7 @@ async def start_command(message: types.Message) -> None:
                 name=telegram_user.first_name,
                 surname=telegram_user.last_name,
                 mention=telegram_user.get_mention(),
-            )
+            ),
         )
     else:
         user = await UserCRUD.create_user(
@@ -44,14 +44,9 @@ async def start_command(message: types.Message) -> None:
         )
         await GroupCRUD.add_user_to_group(user_id=user.id, group_id=group.id)
 
-    reply = await message.reply(
-        text=f"Welcome to the club, {telegram_user.get_mention()}",
-        parse_mode=types.ParseMode.MARKDOWN_V2,
+    await ChatService.reply(
+        message, f"Welcome to the club, {telegram_user.get_mention()}", is_markdown=True
     )
-    await wait_for()
-    if ChatService.is_group(chat):
-        await message.delete()
-        await reply.delete()
 
 
 @dp.message_handler(commands=["users"])
@@ -61,8 +56,9 @@ async def get_users(message: types.Message) -> None:
         return
 
     users = await UserCRUD.get_group_users(telegram_id=chat.id)
+    if not users:
+        await ChatService.reply(message, "No one joined to this group(")
+        return
+
     users = [f"{user.mention}" for user in users]
-    response = await message.reply("\n".join(map(str, users)), parse_mode=types.ParseMode.MARKDOWN_V2)
-    await wait_for()
-    await message.delete()
-    await response.delete()
+    await ChatService.reply(message, "\n".join(map(str, users)), is_markdown=True)
