@@ -39,7 +39,7 @@ async def start_command(message: types.Message) -> None:
         )
 
     if ChatService.is_group(chat):
-        group = await GroupCRUD.create_group(
+        group = await GroupCRUD.update_or_create_group(
             group_data=GroupCreateSchema(telegram_id=chat.id, title=chat.title)
         )
         await GroupCRUD.add_user_to_group(user_id=user.id, group_id=group.id)

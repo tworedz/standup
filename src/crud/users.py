@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from typing import Optional
 from uuid import UUID
@@ -97,7 +98,7 @@ class GroupCRUD(BaseCRUD):
         return cls.get_parsed_object(result)
 
     @classmethod
-    async def create_group(cls, group_data: GroupCreateSchema) -> GroupSchema:
+    async def update_or_create_group(cls, group_data: GroupCreateSchema) -> GroupSchema:
         values = {
             **cls.generate_id(),
             **cls.time_stamp(),
@@ -108,7 +109,11 @@ class GroupCRUD(BaseCRUD):
             insert(cls._model, values=values)
             .returning(*cls._model.__table__.columns)
             .on_conflict_do_update(
-                index_elements=["telegram_id"], set_={cls._model.title.key: group_data.title}
+                index_elements=["telegram_id"],
+                set_={
+                    cls._model.title.key: group_data.title,
+                    cls._model.updated_at.key: datetime.now(),
+                },
             )
         )
         result = await database.fetch_one(query)
