@@ -19,6 +19,9 @@ class AuthenticationMiddleware(BaseMiddleware):
         if not message.is_command():
             return
 
+        if not ChatService.is_group(message.chat):
+            return
+
         command = message.get_command(pure=True)
         current_user = message.from_user
         administrators = await message.chat.get_administrators()
