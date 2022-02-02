@@ -25,7 +25,8 @@ async def feedback_handler(message: types.Message) -> None:
 
     args = message.get_args()
     if not args:
-        await ChatService.reply(message, "Example: `/feedback Add language support`")
+        await ChatService.reply(message, "Example: `/feedback Add language support`", is_markdown=True)
+        return
 
     await FeedbackCRUD.create_feedback(
         data=FeedbackCreateSchema(from_user_telegram_id=message.from_user.id, message=args)
@@ -33,9 +34,12 @@ async def feedback_handler(message: types.Message) -> None:
     await ChatService.reply(message, messages.THANKS_FOR_FEEDBACK)
 
 
-@dp.message_handler(commands=["gaf"], content_types=types.ChatType.PRIVATE)
+@dp.message_handler(commands=["gaf"])
 async def get_all_feedbacks(message: types.Message) -> None:
     """All the feedbacks"""
+
+    if message.chat.type != types.ChatType.PRIVATE:
+        return
 
     if message.from_user.username != settings.MY_USERNAME:
         return
