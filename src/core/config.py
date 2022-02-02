@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     TIMEOUT: int = 30
 
     # Telegram
+    MY_USERNAME: str = ""
     TELEGRAM_BOT_API_KEY: SecretStr = ""
     TELEGRAM_BOT_WEBHOOK_ENDPOINT: str = ""
     TELEGRAM_DROP_PENDING_UPDATES: bool = True

@@ -3,6 +3,7 @@ import random
 
 from aiogram import types
 
+from core.config import settings
 from crud.feedbacks import FeedbackCRUD
 from schemas.feedbacks import FeedbackCreateSchema
 from sdk.utils import wait_for
@@ -30,3 +31,19 @@ async def feedback_handler(message: types.Message) -> None:
         data=FeedbackCreateSchema(from_user_telegram_id=message.from_user.id, message=args)
     )
     await ChatService.reply(message, messages.THANKS_FOR_FEEDBACK)
+
+
+@dp.message_handler(commands=["gaf"], content_types=types.ChatType.PRIVATE)
+async def get_all_feedbacks(message: types.Message) -> None:
+    """All the feedbacks"""
+
+    if message.from_user.username != settings.MY_USERNAME:
+        return
+
+    feedbacks = await FeedbackCRUD.get_feedbacks()
+    if not feedbacks:
+        text = "No one send feedback"
+    else:
+        text = "\n".join([feedback.message for feedback in feedbacks])
+
+    await ChatService.reply(message, text=text)

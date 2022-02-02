@@ -27,6 +27,11 @@ class FeedbackCRUD(BaseCRUD):
     _model_schema = FeedbackSchema
 
     @classmethod
+    async def get_feedbacks(cls) -> List[FeedbackSchema]:
+        query = cls.get_base_query()
+        return await cls.get_results(query)
+
+    @classmethod
     async def create_feedback(cls, data: FeedbackCreateSchema) -> Optional[FeedbackSchema]:
         values = {
             **cls.generate_id(),
