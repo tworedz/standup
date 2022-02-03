@@ -13,6 +13,8 @@ from models import WarmUpSummon
 from sdk.exceptions import telegram_exception_handler
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
+
+from services.warmups import WarmUpService
 from telegram.bot import bot
 
 app = FastAPI(exception_handlers={TelegramAPIError: telegram_exception_handler})
@@ -28,16 +30,7 @@ async def warmup():
     groups = await GroupCRUD.get_groups()
 
     for group in groups:
-        user = await WarmUpSummonService.get_warmup_user(group_telegram_id=group.telegram_id)
-        summoner = await WarmUpSummonCRUD.get_random_summoner()
-        keyboard = build_warmup_keyboard(user)
-
-        await bot.send_message(
-            chat_id=group.telegram_id,
-            text=summoner.text.format(user.mention),
-            parse_mode=types.ParseMode.MARKDOWN_V2,
-            reply_markup=keyboard,
-        )
+        await WarmUpService.warmup(telegram_group_id=group.telegram_id)
 
 
 BASE_SUMMONERS = [

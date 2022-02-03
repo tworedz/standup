@@ -8,7 +8,9 @@ from aiogram import filters
 from core.logging import logger
 from crud.users import UserCRUD
 from crud.warmups import WarmUpSummonCRUD
+from schemas.warmups import WarmUpUpdateSchema
 from sdk.utils import wait_for
+from services.warmups import WarmUpService
 from services.warmups import WarmUpSummonService
 from telegram import messages
 from telegram.dispatcher import dp
@@ -90,28 +92,43 @@ async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
     return True
 
 
-@dp.callback_query_handler(filters.Regexp(regexp=r"next_user"))
+@dp.callback_query_handler(filters.Regexp(regexp=r"next_user:.*?"))
 async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
-    admins = await callback_query.message.chat.get_administrators()
-    admin_ids = [admin.user.id for admin in admins]
-    if callback_query.from_user.id not in admin_ids:
-        return await callback_query.answer("Hey, you are not admin", show_alert=True)
+    # admins = await callback_query.message.chat.get_administrators()
+    # admin_ids = [admin.user.id for admin in admins]
+    # if callback_query.from_user.id not in admin_ids:
+    #     return await callback_query.answer("Hey, you are not admin", show_alert=True)
+    chat_id = callback_query.message.chat.id
 
-    await callback_query.message.edit_text(
-        text=callback_query.message.md_text,
-        parse_mode=types.ParseMode.MARKDOWN_V2,
-        reply_markup=None,
-    )
+    _, user_id = callback_query.data.split(":")
+    user_id = UUID(user_id)
+    user = await UserCRUD.get_user_by_id(user_id)
+    warmup = await WarmUpService.get_warmup(user_id=user.id, telegram_group_id=chat_id)
+    voting_user = await UserCRUD.get_user_by_telegram_id(telegram_id=callback_query.from_user.id)
+    voted_user_ids = {voting_user.id}.symmetric_difference(warmup.voted_user_ids)
+    voted_count = len(voted_user_ids)
 
-    user = await WarmUpSummonService.get_warmup_user(
-        group_telegram_id=callback_query.message.chat.id
-    )
-    summoner = await WarmUpSummonCRUD.get_random_summoner()
-    keyboard = build_warmup_keyboard(user)
+    if voted_count == 4:
+        await callback_query.message.edit_text(
+            text=callback_query.message.md_text,
+            parse_mode=types.ParseMode.MARKDOWN_V2,
+            reply_markup=None,
+        )
 
-    await callback_query.message.reply(
-        text=summoner.text.format(user.mention),
-        parse_mode=types.ParseMode.MARKDOWN_V2,
-        reply_markup=keyboard,
-    )
-    return True
+        await WarmUpService.warmup(telegram_group_id=chat_id)
+        return await callback_query.answer("OK. There is another warmuper!")
+    else:
+        await WarmUpService.update_warmup(
+            user_id=user.id,
+            telegram_group_id=chat_id,
+            data=WarmUpUpdateSchema(current_vote_count=voted_count, voted_user_ids=voted_user_ids),
+        )
+
+        keyboard = build_warmup_keyboard(user, voted_count)
+
+        await callback_query.message.edit_text(
+            text=callback_query.message.md_text,
+            parse_mode=types.ParseMode.MARKDOWN_V2,
+            reply_markup=keyboard,
+        )
+        return await callback_query.answer("Got u")

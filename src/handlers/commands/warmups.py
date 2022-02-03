@@ -5,6 +5,7 @@ from crud.warmups import WarmUpSummonCRUD
 from schemas.warmups import WarmUpSummonCreateSchema
 from sdk.utils import wait_for
 from services.chats import ChatService
+from services.warmups import WarmUpService
 from services.warmups import WarmUpSummonService
 from telegram import messages
 from telegram.dispatcher import dp
@@ -48,10 +49,4 @@ async def warmup(message: types.Message) -> None:
         await ChatService.reply(message, "No one joined to this group(")
         return
 
-    user = await WarmUpSummonService.get_warmup_user(group_telegram_id=message.chat.id)
-    summoner = await WarmUpSummonCRUD.get_random_summoner()
-    keyboard = build_warmup_keyboard(user)
-
-    await ChatService.reply(
-        message, text=summoner.text.format(user.mention), reply_markup=keyboard, is_markdown=True
-    )
+    await WarmUpService.warmup(message=message, telegram_group_id=message.chat.id)

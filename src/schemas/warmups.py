@@ -4,6 +4,31 @@ from pydantic import BaseModel
 from pydantic import validator
 
 
+class WarmUpSchema(BaseModel):
+    """Схема тренировки"""
+
+    id: UUID
+    user_id: UUID
+    telegram_group_id: int
+    current_vote_count: int
+    voted_user_ids: set[UUID]
+
+
+class WarmUpCreateSchema(BaseModel):
+    """Схема создания тренировки"""
+
+    user_id: UUID
+    telegram_group_id: int
+
+
+class WarmUpUpdateSchema(BaseModel):
+    """Схема изменения тренировки"""
+
+    current_vote_count: int
+    voted_user_ids: set[UUID]
+
+
+
 class WarmUpSummonSchema(BaseModel):
     """Схема призывалки"""
 

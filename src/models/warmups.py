@@ -8,6 +8,17 @@ from models.base import UserChangesMixin
 from sqlalchemy.dialects.postgresql import UUID
 
 
+class WarmUp(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
+    """Тренировка"""
+
+    __tablename__ = "warmups"
+
+    user_id = sa.Column(UUID, sa.ForeignKey("users.id", ondelete="CASCADE"))
+    telegram_group_id = sa.Column(sa.BigInteger)
+    current_vote_count = sa.Column(sa.Integer)
+    voted_user_ids = sa.Column(ARRAY(UUID))
+
+
 class WarmUpSchedule(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
     """Тренировки"""
 

@@ -1,11 +1,16 @@
+from datetime import datetime
 from typing import List
 from typing import Optional
 from uuid import UUID
 
 import sqlalchemy as sa
 from core.database import database
+from models import WarmUp
 from models import WarmupQueue
 from models import WarmUpSummon
+from schemas.warmups import WarmUpCreateSchema
+from schemas.warmups import WarmUpSchema
+from schemas.warmups import WarmUpUpdateSchema
 from schemas.warmups import WarmupQueueCreateSchema
 from schemas.warmups import WarmupQueueSchema
 from schemas.warmups import WarmupQueueUpdateSchema
@@ -78,8 +83,61 @@ class WarmupQueueCRUD(BaseCRUD):
     ) -> Optional[WarmupQueueSchema]:
         values = {cls._model.user_ids.key: data.user_ids}
 
-        query = sa.update(cls._model, values=values).where(
-            cls._model.group_telegram_id == group_telegram_id,
-        ).returning(*cls._model.__table__.columns)
+        query = (
+            sa.update(cls._model, values=values)
+            .where(
+                cls._model.group_telegram_id == group_telegram_id,
+            )
+            .returning(*cls._model.__table__.columns)
+        )
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
+
+
+class WarmUpCRUD(BaseCRUD):
+    _model = WarmUp
+    _model_schema = WarmUpSchema
+
+    @classmethod
+    async def get_warmup(cls, user_id: UUID, telegram_group_id: int) -> Optional[WarmUpSchema]:
+        query = cls.get_base_query().where(
+            sa.and_(
+                cls._model.user_id == user_id, cls._model.telegram_group_id == telegram_group_id
+            )
+        ).order_by(cls._model.created_at.desc())
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
+
+    @classmethod
+    async def create_warmup(cls, data: WarmUpCreateSchema) -> WarmUpSchema:
+        values = {
+            **cls.generate_id(),
+            **cls.time_stamp(),
+            cls._model.user_id.key: data.user_id,
+            cls._model.telegram_group_id.key: data.telegram_group_id,
+            cls._model.current_vote_count.key: 0,
+            cls._model.voted_user_ids.key: set(),
+        }
+        query = sa.insert(cls._model, values=values).returning(*cls._model.__table__.columns)
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
+
+    @classmethod
+    async def update_warmup(
+        cls, user_id: UUID, telegram_group_id: int, data: WarmUpUpdateSchema
+    ) -> WarmUpSchema:
+        values = {
+            cls._model.updated_at.key: datetime.now(),
+            **data.dict(),
+        }
+        query = (
+            sa.update(cls._model, values=values)
+            .where(
+                sa.and_(
+                    cls._model.user_id == user_id, cls._model.telegram_group_id == telegram_group_id
+                )
+            )
+            .returning(*cls._model.__table__.columns)
+        )
         result = await database.fetch_one(query)
         return cls.get_parsed_object(result)
