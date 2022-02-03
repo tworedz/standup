@@ -26,26 +26,20 @@ from telegram.inline_keyboard.summoners import build_warmup_keyboard
 
 class WarmUpService:
     @classmethod
-    async def warmup(cls, telegram_group_id: int, message: Optional[types.Message] = None) -> None:
+    async def warmup(cls, telegram_group_id: int) -> None:
         user = await WarmUpSummonService.get_warmup_user(group_telegram_id=telegram_group_id)
         summoner = await WarmUpSummonCRUD.get_random_summoner()
         keyboard = build_warmup_keyboard(user)
-        text = summoner.text.format(user.mention)
         await WarmUpCRUD.create_warmup(
-            data=WarmUpCreateSchema(user_id=user.id, telegram_group_id=telegram_group_id)
+            data=WarmUpCreateSchema(user_id=user.id, telegram_group_id=telegram_group_id, warmup_summon_id=summoner.id)
         )
 
-        # if message:
-        #     await ChatService.reply(message, text=text, reply_markup=keyboard, is_markdown=True)
-        #     return
-        #
         await bot.send_message(
             chat_id=telegram_group_id,
             text=summoner.text.format(user.mention),
             parse_mode=types.ParseMode.MARKDOWN_V2,
             reply_markup=keyboard,
         )
-
 
     @classmethod
     async def get_warmup(cls, user_id: UUID, telegram_group_id: int) -> Optional[WarmUpSchema]:

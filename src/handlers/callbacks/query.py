@@ -52,7 +52,7 @@ async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
         ],
         [
             aiogram.types.inline_keyboard.InlineKeyboardButton(
-                text=messages.NEXT_USER, callback_data="next_user"
+                text="Cancel", callback_data=f"cancel:{user_id}"
             ),
         ],
     ]
@@ -92,12 +92,29 @@ async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
     return True
 
 
+@dp.callback_query_handler(filters.Regexp(regexp=r"cancel:.*?"))
+async def cancel_current_warmup(callback_query: types.CallbackQuery):
+    _, user_id = callback_query.data.split(":")
+    user_id = UUID(user_id)
+
+    user = await UserCRUD.get_user_by_id(user_id)
+    if user.telegram_id != callback_query.from_user.id:
+        return await callback_query.answer("Hey, you are not this user")
+
+    warmup = await WarmUpService.get_warmup(user_id=user.id, telegram_group_id=callback_query.message.chat.id)
+    summoner = await WarmUpSummonCRUD.get_summoner_by_id(warmup.warmup_summon_id)
+    keyboard = build_warmup_keyboard(user, current_count=len(warmup.voted_user_ids))
+
+    await callback_query.message.edit_text(
+        text=summoner.text.format(user.mention),
+        parse_mode=types.ParseMode.MARKDOWN_V2,
+        reply_markup=keyboard,
+    )
+    return await callback_query.answer("Here we go again")
+
+
 @dp.callback_query_handler(filters.Regexp(regexp=r"next_user:.*?"))
 async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
-    # admins = await callback_query.message.chat.get_administrators()
-    # admin_ids = [admin.user.id for admin in admins]
-    # if callback_query.from_user.id not in admin_ids:
-    #     return await callback_query.answer("Hey, you are not admin", show_alert=True)
     chat_id = callback_query.message.chat.id
 
     _, user_id = callback_query.data.split(":")
@@ -121,7 +138,7 @@ async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
         await WarmUpService.update_warmup(
             user_id=user.id,
             telegram_group_id=chat_id,
-            data=WarmUpUpdateSchema(current_vote_count=voted_count, voted_user_ids=voted_user_ids),
+            data=WarmUpUpdateSchema(voted_user_ids=voted_user_ids),
         )
 
         keyboard = build_warmup_keyboard(user, voted_count)

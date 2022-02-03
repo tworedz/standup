@@ -49,4 +49,4 @@ async def warmup(message: types.Message) -> None:
         await ChatService.reply(message, "No one joined to this group(")
         return
 
-    await WarmUpService.warmup(message=message, telegram_group_id=message.chat.id)
+    await WarmUpService.warmup(telegram_group_id=message.chat.id)

@@ -15,7 +15,7 @@ class WarmUp(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
 
     user_id = sa.Column(UUID, sa.ForeignKey("users.id", ondelete="CASCADE"))
     telegram_group_id = sa.Column(sa.BigInteger)
-    current_vote_count = sa.Column(sa.Integer)
+    warmup_summon_id = sa.Column(UUID, sa.ForeignKey("warmup_summons.id", ondelete="CASCADE"))
     voted_user_ids = sa.Column(ARRAY(UUID))
 
 

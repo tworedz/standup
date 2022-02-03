@@ -25,6 +25,12 @@ class WarmUpSummonCRUD(BaseCRUD):
     _model_schema = WarmUpSummonSchema
 
     @classmethod
+    async def get_summoner_by_id(cls, summoner_id: UUID) -> Optional[WarmUpSummonSchema]:
+        query = cls.get_base_query().where(cls._model.id == summoner_id)
+        result = await database.fetch_one(query)
+        return cls.get_parsed_object(result)
+
+    @classmethod
     async def get_summoners(cls) -> List[WarmUpSummonSchema]:
         query = cls.get_base_query()
         return await cls.get_results(query)
@@ -113,9 +119,7 @@ class WarmUpCRUD(BaseCRUD):
         values = {
             **cls.generate_id(),
             **cls.time_stamp(),
-            cls._model.user_id.key: data.user_id,
-            cls._model.telegram_group_id.key: data.telegram_group_id,
-            cls._model.current_vote_count.key: 0,
+            **data.dict(),
             cls._model.voted_user_ids.key: set(),
         }
         query = sa.insert(cls._model, values=values).returning(*cls._model.__table__.columns)

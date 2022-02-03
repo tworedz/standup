@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -10,7 +11,7 @@ class WarmUpSchema(BaseModel):
     id: UUID
     user_id: UUID
     telegram_group_id: int
-    current_vote_count: int
+    warmup_summon_id: Optional[UUID]
     voted_user_ids: set[UUID]
 
 
@@ -19,12 +20,12 @@ class WarmUpCreateSchema(BaseModel):
 
     user_id: UUID
     telegram_group_id: int
+    warmup_summon_id: UUID
 
 
 class WarmUpUpdateSchema(BaseModel):
     """Схема изменения тренировки"""
 
-    current_vote_count: int
     voted_user_ids: set[UUID]
 
 
