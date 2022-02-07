@@ -115,8 +115,21 @@ async def cancel_current_warmup(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(filters.Regexp(regexp=r"next_user:.*?"))
 async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
-    return await callback_query.answer("Hey, this feature temporary disabled")
     chat_id = callback_query.message.chat.id
+    admins = await callback_query.message.chat.get_administrators()
+    admin_ids = [admin.user.id for admin in admins]
+    if callback_query.from_user.id not in admin_ids:
+        return await callback_query.answer("Hey, you are not admin", show_alert=True)
+
+    await callback_query.message.edit_text(
+        text=callback_query.message.md_text,
+        parse_mode=types.ParseMode.MARKDOWN_V2,
+        reply_markup=None,
+    )
+
+    await WarmUpService.warmup(telegram_group_id=chat_id)
+    return True
+    return await callback_query.answer("Hey, this feature temporary disabled")
 
     _, user_id = callback_query.data.split(":")
     user_id = UUID(user_id)
