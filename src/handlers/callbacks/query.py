@@ -115,6 +115,7 @@ async def cancel_current_warmup(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(filters.Regexp(regexp=r"next_user:.*?"))
 async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
+    return await callback_query.answer("Hey, this feature temporary disabled")
     chat_id = callback_query.message.chat.id
 
     _, user_id = callback_query.data.split(":")
