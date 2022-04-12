@@ -28,7 +28,7 @@ def build_warmup_keyboard(user: UserSchema, current_count: int = 0) -> inline_ke
             text=messages.CANNOT_DO_WARMUP, callback_data=f"cannot_{user.id}"
         ),
         inline_keyboard.InlineKeyboardButton(
-            text=f"{messages.NEXT_USER} ({current_count}/4)", callback_data=f"next_user:{user.id}"
+            text=f"{messages.NEXT_USER} ({current_count}/10)", callback_data=f"next_user:{user.id}"
         )
     ]
     keyboard.append(cannot_btn)
