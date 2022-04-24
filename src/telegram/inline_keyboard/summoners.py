@@ -1,5 +1,4 @@
 from aiogram.types import inline_keyboard
-
 from schemas.users import UserSchema
 from schemas.warmups import WarmUpSummonSchema
 from telegram import messages
@@ -21,7 +20,9 @@ def build_summoner_list_keyboard(
     return inline_keyboard.InlineKeyboardMarkup(row_width=2, inline_keyboard=keyboard)
 
 
-def build_warmup_keyboard(user: UserSchema, current_count: int = 0) -> inline_keyboard.InlineKeyboardMarkup:
+def build_warmup_keyboard(
+    user: UserSchema, current_count: int = 0
+) -> inline_keyboard.InlineKeyboardMarkup:
     keyboard = []
     cannot_btn = [
         inline_keyboard.InlineKeyboardButton(
@@ -29,7 +30,7 @@ def build_warmup_keyboard(user: UserSchema, current_count: int = 0) -> inline_ke
         ),
         inline_keyboard.InlineKeyboardButton(
             text=f"{messages.NEXT_USER} ({current_count}/10)", callback_data=f"next_user:{user.id}"
-        )
+        ),
     ]
     keyboard.append(cannot_btn)
     return inline_keyboard.InlineKeyboardMarkup(row_width=1, inline_keyboard=keyboard)

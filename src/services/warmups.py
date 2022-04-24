@@ -1,26 +1,23 @@
 import random
-import re
 from typing import Optional
 from uuid import UUID
 
+from aiogram import types
 from aiogram.types import InlineKeyboardMarkup
 
 from crud.users import UserCRUD
 from crud.warmups import WarmUpCRUD
 from crud.warmups import WarmupQueueCRUD
 from crud.warmups import WarmUpSummonCRUD
-from models import WarmupQueue
 from schemas.users import UserSchema
 from schemas.warmups import WarmUpCreateSchema
-from schemas.warmups import WarmUpSchema
-from schemas.warmups import WarmUpUpdateSchema
 from schemas.warmups import WarmupQueueCreateSchema
 from schemas.warmups import WarmupQueueUpdateSchema
-from services.chats import ChatService
+from schemas.warmups import WarmUpSchema
+from schemas.warmups import WarmUpUpdateSchema
 from telegram import messages
 from telegram.bot import bot
 from telegram.inline_keyboard.summoners import build_summoner_list_keyboard
-from aiogram import types
 from telegram.inline_keyboard.summoners import build_warmup_keyboard
 
 
@@ -31,7 +28,9 @@ class WarmUpService:
         summoner = await WarmUpSummonCRUD.get_random_summoner()
         keyboard = build_warmup_keyboard(user)
         await WarmUpCRUD.create_warmup(
-            data=WarmUpCreateSchema(user_id=user.id, telegram_group_id=telegram_group_id, warmup_summon_id=summoner.id)
+            data=WarmUpCreateSchema(
+                user_id=user.id, telegram_group_id=telegram_group_id, warmup_summon_id=summoner.id
+            )
         )
 
         await bot.send_message(

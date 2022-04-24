@@ -1,6 +1,8 @@
 from aiogram import types
 
+from crud.films import FilmCRUD
 from crud.users import GroupCRUD
+from schemas.films import FilmSettingUpdateOrCreateSchema
 from schemas.users import GroupCreateSchema
 from services.chats import ChatService
 from telegram.dispatcher import dp
@@ -14,6 +16,11 @@ async def bot_joined_to_chat(update: types.ChatMemberUpdated) -> None:
         await GroupCRUD.update_or_create_group(
             group_data=GroupCreateSchema(telegram_id=update.chat.id, title=update.chat.title)
         )
-    await update.bot.send_message(
-        update.chat.id, f"Hello, friends!"
-    )
+
+    if ChatService.is_channel(update.chat):
+        await FilmCRUD.update_or_create_channel_settings(
+            telegram_channel_id=update.chat.id,
+            data=FilmSettingUpdateOrCreateSchema(),
+        )
+
+    await update.bot.send_message(update.chat.id, "Hello, friends!")

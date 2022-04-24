@@ -1,12 +1,8 @@
-import asyncio
-import random
-
 from aiogram import types
 
 from core.config import settings
 from crud.feedbacks import FeedbackCRUD
 from schemas.feedbacks import FeedbackCreateSchema
-from sdk.utils import wait_for
 from services.chats import ChatService
 from telegram import messages
 from telegram.dispatcher import dp
@@ -25,7 +21,9 @@ async def feedback_handler(message: types.Message) -> None:
 
     args = message.get_args()
     if not args:
-        await ChatService.reply(message, "Example: `/feedback Add language support`", is_markdown=True)
+        await ChatService.reply(
+            message, "Example: `/feedback Add language support`", is_markdown=True
+        )
         return
 
     await FeedbackCRUD.create_feedback(

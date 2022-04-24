@@ -4,14 +4,12 @@ from typing import Optional
 from uuid import UUID
 
 import sqlalchemy as sa
-from pydantic import parse_obj_as
-from sqlalchemy.dialects.postgresql import insert
-
 from core.database import database
 from crud.base import BaseCRUD
 from models import Group
 from models import User
 from models import UserGroup
+from pydantic import parse_obj_as
 from schemas.users import GroupCreateSchema
 from schemas.users import GroupMigrateSchema
 from schemas.users import GroupSchema
@@ -19,6 +17,7 @@ from schemas.users import GroupUpdateSchema
 from schemas.users import UserCreateSchema
 from schemas.users import UserSchema
 from schemas.users import UserUpdateSchema
+from sqlalchemy.dialects.postgresql import insert
 
 
 class UserCRUD(BaseCRUD):

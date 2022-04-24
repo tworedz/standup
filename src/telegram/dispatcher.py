@@ -1,7 +1,6 @@
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-
 from core.config import settings
 from sdk.middlewares import AuthenticationMiddleware
 from telegram.bot import bot

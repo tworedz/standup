@@ -29,7 +29,6 @@ class WarmUpUpdateSchema(BaseModel):
     voted_user_ids: set[UUID]
 
 
-
 class WarmUpSummonSchema(BaseModel):
     """Схема призывалки"""
 

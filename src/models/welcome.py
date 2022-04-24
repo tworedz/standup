@@ -4,6 +4,10 @@ import sqlalchemy as sa
 from core.database import Base
 from sqlalchemy.dialects.postgresql import UUID
 
+__all__ = [
+    "WelcomeFile",
+]
+
 
 class WelcomeFile(Base):
     """"""

@@ -1,26 +1,22 @@
 import logging
 from typing import Optional
 
+from enums.languages import LanguageEnum
 from pydantic import AnyHttpUrl
 from pydantic import BaseSettings
 from pydantic import PostgresDsn
 from pydantic import SecretStr
 from pydantic import validator
 
-from enums.languages import LanguageEnum
-
 
 class Settings(BaseSettings):
     """Project settings from env variables"""
 
     APP_DEBUG: bool = True
-    DEBUG_LEVEl: str = logging.getLevelName(logging.DEBUG)
+    DEBUG_LEVEl: str = logging.getLevelName(logging.INFO)
     HOST_PATH: AnyHttpUrl = "http://localhost"
     WEBHOOK_ENABLED: bool = False
-    REPEAT_EVERY: int = 60 * 10
-    FILM_ID: int = 1307
-    CHANNEL_ID: str = "-1001709625266"
-    TIMEOUT: int = 30
+    TS_SITE: str = "https://www.cinematica.kg/movies/"
 
     # Telegram
     MY_USERNAME: str = ""
@@ -42,8 +38,6 @@ class Settings(BaseSettings):
             + values.get("TELEGRAM_BOT_API_KEY").get_secret_value()
             + "/"
         )
-
-    DEFAULT_LANGUAGE: LanguageEnum = LanguageEnum.EN
 
     # Database settings
     DB_USER: str = "postgres"

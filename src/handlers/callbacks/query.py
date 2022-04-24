@@ -3,8 +3,8 @@ from datetime import timedelta
 from uuid import UUID
 
 import aiogram.types.inline_keyboard
-from aiogram import types
 from aiogram import filters
+from aiogram import types
 from core.logging import logger
 from crud.users import UserCRUD
 from crud.warmups import WarmUpSummonCRUD
@@ -101,7 +101,9 @@ async def cancel_current_warmup(callback_query: types.CallbackQuery):
     if user.telegram_id != callback_query.from_user.id:
         return await callback_query.answer("Hey, you are not this user")
 
-    warmup = await WarmUpService.get_warmup(user_id=user.id, telegram_group_id=callback_query.message.chat.id)
+    warmup = await WarmUpService.get_warmup(
+        user_id=user.id, telegram_group_id=callback_query.message.chat.id
+    )
     summoner = await WarmUpSummonCRUD.get_summoner_by_id(warmup.warmup_summon_id)
     keyboard = build_warmup_keyboard(user, current_count=len(warmup.voted_user_ids))
 
@@ -139,7 +141,7 @@ async def cannot_do_warmup_handler(callback_query: types.CallbackQuery):
     voted_user_ids = {voting_user.id}.symmetric_difference(warmup.voted_user_ids)
     voted_count = len(voted_user_ids)
 
-    if voted_count == 10:
+    if voted_count >= 10:
         await callback_query.message.edit_text(
             text=callback_query.message.md_text,
             parse_mode=types.ParseMode.MARKDOWN_V2,

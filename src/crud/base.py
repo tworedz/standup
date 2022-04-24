@@ -35,9 +35,11 @@ class BaseCRUD:
             cls._model.created_at.key: datetime.now(),
         }
         if is_updated:
-            data.update({
-                cls._model.updated_at.key: datetime.now(),
-            })
+            data.update(
+                {
+                    cls._model.updated_at.key: datetime.now(),
+                }
+            )
         return data
 
     @classmethod

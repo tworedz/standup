@@ -1,6 +1,5 @@
 import aiogram
 from aiogram import types
-
 from crud.users import GroupCRUD
 from crud.users import UserCRUD
 from schemas.users import GroupCreateSchema

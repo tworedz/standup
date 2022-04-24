@@ -1,5 +1,4 @@
 from aiogram import types
-
 from crud.users import UserCRUD
 from crud.warmups import WarmUpSummonCRUD
 from schemas.warmups import WarmUpSummonCreateSchema

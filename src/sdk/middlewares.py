@@ -1,9 +1,6 @@
-import asyncio
-
-import aiogram
+from aiogram import types
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
-from aiogram import types
 
 from services.chats import ChatService
 

@@ -1,9 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from enums.languages import LanguageEnum
+from pydantic import BaseModel
 
 
 class UserSchema(BaseModel):

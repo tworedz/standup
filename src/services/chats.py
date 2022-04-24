@@ -1,8 +1,7 @@
 from typing import Union
-from aiogram.utils import exceptions
 
 from aiogram import types
-
+from aiogram.utils import exceptions
 from core.logging import logger
 from sdk.utils import wait_for
 
@@ -11,6 +10,10 @@ class ChatService:
     @classmethod
     def is_group(cls, chat: types.Chat) -> bool:
         return chat.type in [types.ChatType.GROUP, types.ChatType.SUPERGROUP]
+
+    @classmethod
+    def is_channel(cls, chat: types.Chat) -> bool:
+        return chat.type in [types.ChatType.CHANNEL]
 
     @classmethod
     async def reply(
@@ -33,9 +36,7 @@ class ChatService:
         """
 
         parse_mode = types.ParseMode.MARKDOWN_V2 if is_markdown else None
-        response = await message.reply(
-            text=text, parse_mode=parse_mode, reply_markup=reply_markup
-        )
+        response = await message.reply(text=text, parse_mode=parse_mode, reply_markup=reply_markup)
         if delete:
             await wait_for()
             try:

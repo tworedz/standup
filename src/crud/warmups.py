@@ -9,13 +9,13 @@ from models import WarmUp
 from models import WarmupQueue
 from models import WarmUpSummon
 from schemas.warmups import WarmUpCreateSchema
-from schemas.warmups import WarmUpSchema
-from schemas.warmups import WarmUpUpdateSchema
 from schemas.warmups import WarmupQueueCreateSchema
 from schemas.warmups import WarmupQueueSchema
 from schemas.warmups import WarmupQueueUpdateSchema
+from schemas.warmups import WarmUpSchema
 from schemas.warmups import WarmUpSummonCreateSchema
 from schemas.warmups import WarmUpSummonSchema
+from schemas.warmups import WarmUpUpdateSchema
 
 from .base import BaseCRUD
 
@@ -44,6 +44,7 @@ class WarmUpSummonCRUD(BaseCRUD):
     @classmethod
     async def create_summoner(cls, data: WarmUpSummonCreateSchema) -> WarmUpSummonSchema:
         summoner = data.text.replace("!", "\!")
+        summoner = summoner.replace("-", "\-")
 
         values = {
             **cls.generate_id(),
@@ -106,11 +107,15 @@ class WarmUpCRUD(BaseCRUD):
 
     @classmethod
     async def get_warmup(cls, user_id: UUID, telegram_group_id: int) -> Optional[WarmUpSchema]:
-        query = cls.get_base_query().where(
-            sa.and_(
-                cls._model.user_id == user_id, cls._model.telegram_group_id == telegram_group_id
+        query = (
+            cls.get_base_query()
+            .where(
+                sa.and_(
+                    cls._model.user_id == user_id, cls._model.telegram_group_id == telegram_group_id
+                )
             )
-        ).order_by(cls._model.created_at.desc())
+            .order_by(cls._model.created_at.desc())
+        )
         result = await database.fetch_one(query)
         return cls.get_parsed_object(result)
 

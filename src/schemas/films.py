@@ -7,6 +7,19 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class FilmSettingSchema(BaseModel):
+    telegram_channel_id: int
+    film_id: Optional[int]
+    cron: str
+    timeout: int
+
+
+class FilmSettingUpdateOrCreateSchema(BaseModel):
+    film_id: Optional[int]
+    cron: str = "*/5 * * * *"
+    timeout: int = 30
+
+
 class BookSchema(BaseModel):
     movie_id: int
     c_id: int

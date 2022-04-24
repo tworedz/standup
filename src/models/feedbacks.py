@@ -1,11 +1,14 @@
 import sqlalchemy as sa
-from sqlalchemy import UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
-
 from core.database import Base
 from models.base import PrimaryKeyMixin
 from models.base import TimeStampedMixin
 from models.base import UserChangesMixin
+from sqlalchemy import UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID
+
+__all__ = [
+    "Feedback",
+]
 
 
 class Feedback(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):

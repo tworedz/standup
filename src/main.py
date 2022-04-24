@@ -1,20 +1,24 @@
+import asyncio
 import logging
 import uuid
 
-import sqlalchemy as sa
 from aiogram.utils.exceptions import TelegramAPIError
 from api.routers import api_router
 from core.config import settings
 from core.database import database
 from core.scheduler import scheduler
 from fastapi import FastAPI
-from handlers import *  # noqa
+
+from crud.users import GroupCRUD
+from schemas.warmups import WarmUpSummonCreateSchema
+from telegram.dispatcher import dp
+from handlers import *
+
 from models import WarmUpSummon
 from sdk.exceptions import telegram_exception_handler
+from services.warmups import WarmUpService
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
-
-from services.warmups import WarmUpService
 from telegram.bot import bot
 
 app = FastAPI(exception_handlers={TelegramAPIError: telegram_exception_handler})
@@ -55,12 +59,7 @@ def insert_base_summoners() -> None:
         conn.execute(q)
 
 
-@app.on_event("startup")
-async def startup():
-    scheduler.start()
-    await database.connect()
-    insert_base_summoners()
-
+async def start_bot() -> None:
     if not settings.WEBHOOK_ENABLED:
         asyncio.create_task(dp.start_polling())
         logger.info("Long polling started".center(79, "-"))
@@ -77,6 +76,15 @@ async def startup():
         )
         logger.info(f"Webhook for url {settings.HOST_PATH} set".center(79, "-"))
     logger.info("Webhook with this url already set".center(79, "-"))
+
+
+@app.on_event("startup")
+async def startup():
+    scheduler.start()
+    await database.connect()
+    insert_base_summoners()
+    await update_cron_list()
+    await start_bot()
 
 
 @app.on_event("shutdown")
