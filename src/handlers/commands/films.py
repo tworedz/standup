@@ -46,7 +46,8 @@ async def set_film(message: types.Message, link: str):
         return await ChatService.reply(message, f"Timeout for fetching: {e.url=} {e.timeout=}")
 
     old_film = await FilmCRUD.get_channel_settings(telegram_channel_id=message.chat.id)
-    await remove_film_job(film=old_film)
+    if old_film:
+        await remove_film_job(film=old_film)
     await FilmCRUD.update_or_create_channel_settings(
         telegram_channel_id=message.chat.id,
         data=FilmSettingUpdateOrCreateSchema(
@@ -79,6 +80,10 @@ async def process_timeout_command(message: types.Message) -> None:
     raw_timeout = message.get_args()
     if not raw_timeout:
         film_settings = await FilmCRUD.get_channel_settings(telegram_channel_id=message.chat.id)
+        if not film_settings:
+            film_settings = await FilmCRUD.update_or_create_channel_settings(
+                telegram_channel_id=message.chat.id, data=FilmSettingUpdateOrCreateSchema()
+            )
         return await ChatService.reply(
             message,
             f"Current timeout: `{film_settings.timeout}`",
@@ -113,6 +118,10 @@ async def process_cron_command(message: types.Message) -> None:
     raw_cron = message.get_args()
     if not raw_cron:
         film_settings = await FilmCRUD.get_channel_settings(telegram_channel_id=message.chat.id)
+        if not film_settings:
+            film_settings = await FilmCRUD.update_or_create_channel_settings(
+                telegram_channel_id=message.chat.id, data=FilmSettingUpdateOrCreateSchema()
+            )
         return await ChatService.reply(
             message,
             f"Current cron: `{film_settings.cron}`",
@@ -134,5 +143,3 @@ async def process_cron_command(message: types.Message) -> None:
     )
     await update_cron_list()
     return await ChatService.reply(message, f"Cron set to `{film_setting.cron}`", is_markdown=True)
-
-
