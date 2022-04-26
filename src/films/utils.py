@@ -72,8 +72,10 @@ async def check_film(telegram_channel_id: int, film_id: int, timeout: int = 5):
     except BaseFilmException as e:
         return await bot.send_message(chat_id=telegram_channel_id, text=str(e))
 
-    text = f"""<a href="{get_movie_page_url(film_id)}"><b>{movie_info.name}</b></a>\n\n"""
-    if cinemas:
+    is_exist = bool(cinemas)
+    mark = "✅" if is_exist else "❌"
+    text = f"""{mark}<a href="{get_movie_page_url(film_id)}"><b>{movie_info.name}</b></a>\n\n"""
+    if is_exist:
         for cinema in cinemas.values():
             text += f"<b>{cinema.cinema}</b>:\n"
             for date in cinema.dates:
@@ -81,7 +83,12 @@ async def check_film(telegram_channel_id: int, film_id: int, timeout: int = 5):
     else:
         text += "<i>Пока нет броней</i>"
 
-    await bot.send_message(telegram_channel_id, text=text, parse_mode=types.ParseMode.HTML, disable_notification=True)
+    await bot.send_message(
+        telegram_channel_id,
+        text=text,
+        parse_mode=types.ParseMode.HTML,
+        disable_notification=not is_exist
+    )
 
 
 def get_film_job_id(film: FilmSettingSchema) -> str:
