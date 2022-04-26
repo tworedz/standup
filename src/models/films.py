@@ -22,3 +22,5 @@ class FilmSetting(UserChangesMixin, TimeStampedMixin, PrimaryKeyMixin, Base):
     film_id = sa.Column(sa.Integer)
     cron = sa.Column(sa.String)
     timeout = sa.Column(sa.Integer)
+    is_enabled = sa.Column(sa.Boolean)
+    forward_to = sa.Column(sa.String)

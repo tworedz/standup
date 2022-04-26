@@ -12,12 +12,16 @@ class FilmSettingSchema(BaseModel):
     film_id: Optional[int]
     cron: str
     timeout: int
+    is_enabled: Optional[bool]
+    forward_to: Optional[str]
 
 
 class FilmSettingUpdateOrCreateSchema(BaseModel):
     film_id: Optional[int]
     cron: str = "*/5 * * * *"
     timeout: int = 30
+    is_enabled: bool = True
+    forward_to: Optional[str]
 
 
 class BookSchema(BaseModel):

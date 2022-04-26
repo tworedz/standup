@@ -11,6 +11,7 @@ from films.utils import remove_film_job
 from films.utils import update_cron_list
 from schemas.films import FilmSettingUpdateOrCreateSchema
 from services.chats import ChatService
+from telegram.bot import bot
 from telegram.dispatcher import dp
 
 
@@ -143,3 +144,62 @@ async def process_cron_command(message: types.Message) -> None:
     )
     await update_cron_list()
     return await ChatService.reply(message, f"Cron set to `{film_setting.cron}`", is_markdown=True)
+
+
+@dp.channel_post_handler(filters.RegexpCommandsFilter(regexp_commands=["forward_to"]))
+async def process_forward_to_command(message: types.Message) -> None:
+    """forward message if success"""
+
+    raw_args = message.get_args()
+    if not raw_args or raw_args.strip().split().__len__() > 1:
+        return await ChatService.reply(
+            message,
+            "Wrong command. Usage: `/forward_to 123456789`",
+            is_markdown=True,
+        )
+
+    chat_id = raw_args.strip()
+    film_setting = await FilmCRUD.update_or_create_channel_settings(
+        telegram_channel_id=message.chat.id,
+        data=FilmSettingUpdateOrCreateSchema(
+            forward_to=chat_id
+        ),
+    )
+
+    return await ChatService.reply(message, f"Forward to `{film_setting.forward_to}`", is_markdown=True)
+
+
+@dp.channel_post_handler(filters.RegexpCommandsFilter(regexp_commands=["stop"]))
+async def process_stop_command(message: types.Message) -> None:
+    """stop"""
+
+    await FilmCRUD.update_or_create_channel_settings(
+        telegram_channel_id=message.chat.id,
+        data=FilmSettingUpdateOrCreateSchema(
+            is_enabled=False,
+        ),
+    )
+    await update_cron_list()
+    return await ChatService.reply(message, "Disabled")
+
+
+@dp.channel_post_handler(filters.RegexpCommandsFilter(regexp_commands=["start"]))
+async def process_start_command(message: types.Message) -> None:
+    """start"""
+
+    await FilmCRUD.update_or_create_channel_settings(
+        telegram_channel_id=message.chat.id,
+        data=FilmSettingUpdateOrCreateSchema(
+            is_enabled=True,
+        ),
+    )
+    await update_cron_list()
+    return await ChatService.reply(message, "Enabled")
+
+
+@dp.channel_post_handler(filters.RegexpCommandsFilter(regexp_commands=["info"]))
+async def process_info_command(message: types.Message) -> None:
+    """info"""
+
+    film_setting = await FilmCRUD.get_channel_settings(telegram_channel_id=message.chat.id)
+    return await ChatService.reply(message, film_setting.__repr__())

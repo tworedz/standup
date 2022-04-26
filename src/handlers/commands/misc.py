@@ -15,6 +15,13 @@ async def ping(message: types.Message):
     await ChatService.reply(message, "Pong!")
 
 
+@dp.message_handler(commands=["get_id"])
+async def get_id(message: types.Message):
+    """get id"""
+
+    await ChatService.reply(message, f"Your id: `{message.chat.id}`", is_markdown=True)
+
+
 @dp.message_handler(commands=["feedback"])
 async def feedback_handler(message: types.Message) -> None:
     """Feedback from user"""

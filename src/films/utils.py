@@ -38,7 +38,7 @@ async def _get(url: str, timeout: int) -> Any:
     return result
 
 
-async def get_movie_info(movie_id: int, timeout: int = 5) -> FilmSchema:
+async def get_movie_info(movie_id: int, timeout: int) -> FilmSchema:
     url = f"https://cinematica.kg/api/v1/movies/{movie_id}"
     result = await _get(url=url, timeout=timeout)
     try:
@@ -65,9 +65,9 @@ async def get_film_cinemas(film_id: int, timeout: int) -> dict[str, Cinema]:
     return cinemas
 
 
-async def check_film(telegram_channel_id: int, film_id: int, timeout: int = 5):
+async def check_film(telegram_channel_id: int, film_id: int, timeout: int):
     try:
-        movie_info = await get_movie_info(film_id)
+        movie_info = await get_movie_info(film_id, timeout)
     except BaseFilmException as e:
         return await bot.send_message(chat_id=telegram_channel_id, text=str(e))
 
@@ -87,12 +87,27 @@ async def check_film(telegram_channel_id: int, film_id: int, timeout: int = 5):
     else:
         text += "<i>Пока нет броней</i>"
 
-    await bot.send_message(
+    message = await bot.send_message(
         telegram_channel_id,
         text=text,
         parse_mode=types.ParseMode.HTML,
-        disable_notification=not is_exist
+        disable_notification=not is_exist,
     )
+    film_setting = await FilmCRUD.get_channel_settings(telegram_channel_id)
+    if is_exist and film_setting and film_setting.forward_to:
+        try:
+            await bot.forward_message(
+                chat_id=film_setting.forward_to,
+                from_chat_id=telegram_channel_id,
+                message_id=message.message_id,
+            )
+        except Exception as e:
+            logger.error(
+                "Cannot forward message",
+                forward_to=film_setting.forward_to,
+                from_chat_id=telegram_channel_id,
+                message=message.message_id,
+            )
 
 
 def get_film_job_id(film: FilmSettingSchema) -> str:
@@ -113,13 +128,14 @@ async def update_cron_list() -> None:
             scheduler.remove_job(get_film_job_id(film))
         except apscheduler.jobstores.base.JobLookupError:
             pass
-        scheduler.add_job(
-            func=check_film,
-            trigger=CronTrigger.from_crontab(film.cron),
-            kwargs={
-                "telegram_channel_id": film.telegram_channel_id,
-                "film_id": film.film_id,
-                "timeout": film.timeout,
-            },
-            id=get_film_job_id(film),
-        )
+        if film.is_enabled:
+            scheduler.add_job(
+                func=check_film,
+                trigger=CronTrigger.from_crontab(film.cron),
+                kwargs={
+                    "telegram_channel_id": film.telegram_channel_id,
+                    "film_id": film.film_id,
+                    "timeout": film.timeout,
+                },
+                id=get_film_job_id(film),
+            )
