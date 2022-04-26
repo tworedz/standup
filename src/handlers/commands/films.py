@@ -154,7 +154,7 @@ async def process_forward_to_command(message: types.Message) -> None:
     if not raw_args or raw_args.strip().split().__len__() > 1:
         return await ChatService.reply(
             message,
-            "Wrong command. Usage: `/forward_to 123456789`",
+            "Wrong command\nUsage: `/forward_to 123456789`",
             is_markdown=True,
         )
 
