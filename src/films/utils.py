@@ -4,6 +4,7 @@ import apscheduler.jobstores
 import httpx
 from aiogram import types
 from apscheduler.triggers.cron import CronTrigger
+from pydantic import ValidationError
 
 from core.logging import logger
 from core.scheduler import scheduler
@@ -40,7 +41,10 @@ async def _get(url: str, timeout: int) -> Any:
 async def get_movie_info(movie_id: int, timeout: int = 5) -> FilmSchema:
     url = f"https://cinematica.kg/api/v1/movies/{movie_id}"
     result = await _get(url=url, timeout=timeout)
-    return FilmSchema.parse_obj(result.json())
+    try:
+        return FilmSchema.parse_obj(result.json())
+    except ValidationError:
+        raise NotFoundException(url=url)
 
 
 def get_movie_page_url(movie_id: int) -> str:

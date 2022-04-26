@@ -42,8 +42,8 @@ async def set_film(message: types.Message, link: str):
 
     try:
         movie_info = await get_movie_info(movie_id=film_id)
-    except TimeoutException as e:
-        return await ChatService.reply(message, f"Timeout for fetching: {e.url=} {e.timeout=}")
+    except BaseFilmException as e:
+        return await ChatService.reply(message, str(e))
 
     old_film = await FilmCRUD.get_channel_settings(telegram_channel_id=message.chat.id)
     if old_film:
