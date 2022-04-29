@@ -24,7 +24,7 @@ async def show_film_info(message: types.Message):
             is_markdown=True,
         )
     try:
-        movie_info = await get_movie_info(movie_id=film_setting.film_id)
+        movie_info = await get_movie_info(movie_id=film_setting.film_id, timeout=film_setting.timeout)
     except BaseFilmException as e:
         return await ChatService.reply(message, str(e))
 
@@ -33,7 +33,7 @@ async def show_film_info(message: types.Message):
 
 async def set_film(message: types.Message, link: str):
     if not link.startswith(settings.TS_SITE):
-        return await ChatService.reply(message, "Wrong link")
+        return await ChatService.reply(message, f"Wrong link. Only this site allowed: {settings.TS_SITE}")
 
     _, _, str_film_id = link.rpartition("/")
     try:
@@ -41,14 +41,15 @@ async def set_film(message: types.Message, link: str):
     except ValueError:
         return await ChatService.reply(message, "Wrong film_id")
 
-    try:
-        movie_info = await get_movie_info(movie_id=film_id)
-    except BaseFilmException as e:
-        return await ChatService.reply(message, str(e))
-
     old_film = await FilmCRUD.get_channel_settings(telegram_channel_id=message.chat.id)
     if old_film:
         await remove_film_job(film=old_film)
+
+    try:
+        movie_info = await get_movie_info(movie_id=film_id, timeout=old_film.timeout)
+    except BaseFilmException as e:
+        return await ChatService.reply(message, str(e))
+
     await FilmCRUD.update_or_create_channel_settings(
         telegram_channel_id=message.chat.id,
         data=FilmSettingUpdateOrCreateSchema(
